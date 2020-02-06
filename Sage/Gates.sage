@@ -1,5 +1,5 @@
 H=(1/sqrt(2))*matrix([[1,1],[1,-1]])
-#CNOT=matrix([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
+CNOT=matrix([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
 X=matrix([[0,1],[1,0]])
 Y=matrix([[0,-i],[i,0]])
 Z=matrix([[1,0],[0,-1]])
@@ -7,14 +7,17 @@ S=matrix([[1,0],[0,i]])
 T=matrix([[1,0],[0,exp(i*pi()/4)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
 
-#Test inputs
+
+#i is control
+#j is the target
+#n is the number of qubits
 
 def CNOT(i,j,n):
 	#  Building initial vectors
 	v={}
 	for ii in range(0,2^n):
 		v["{0:b}".format(ii)]=matrix(1,2^n,{(0,ii):1})
-	
+
 	#  Selecting control vectors
 	c={}
 	ccount=n-i
@@ -34,8 +37,8 @@ def CNOT(i,j,n):
 	def swapPositions(list, pos1, pos2): 
 		get = list[pos1], list[pos2] 
 		list[pos2], list[pos1] = get 
-	
-	
+		return list
+		
 	f=list(c)
 	initswap=[0]
 	for ii in range(0,2^(jindex-1)):
