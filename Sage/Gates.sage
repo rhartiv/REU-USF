@@ -39,7 +39,7 @@ def CNOT(i,j,n):
 		list[pos2], list[pos1] = get 
 		return list
 		
-	f=list(c)
+	f=list(c)o
 	initswap=[0]
 	for ii in range(0,2^(jindex-1)):
 		for iii in range(0,2^(k-1)):
