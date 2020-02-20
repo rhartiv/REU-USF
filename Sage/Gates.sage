@@ -6,6 +6,7 @@ Z=matrix([[1,0],[0,-1]])
 S=matrix([[1,0],[0,i]])
 T=matrix([[1,0],[0,exp(i*pi()/4)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
+Id=matrix.identity(2)
 
 def CNOT(i,j,n):
 	XX=matrix([1])
@@ -31,7 +32,7 @@ def CNOT(i,j,n):
 
 
 #  Here is an older version of the CNOT I made which doesn't utilize 
-#  the inner_product sage command:
+#  the outer_product sage command:
 
 def OldCNOT(i,j,n):
 	#  Building initial vectors
