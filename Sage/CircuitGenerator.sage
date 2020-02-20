@@ -21,6 +21,3 @@ for i in range(n):
 	for j in range(n):
 		if j!=i:
 			fGates.append(CNOT(i,j,n))
-
-		
-
