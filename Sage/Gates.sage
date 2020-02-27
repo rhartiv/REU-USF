@@ -1,11 +1,22 @@
 H=(1/sqrt(2))*matrix([[1,1],[1,-1]])
 X=matrix([[0,1],[1,0]])
-Y=matrix([[0,-i],[i,0]])
+Y=matrix([[0,-I],[I,0]])
 Z=matrix([[1,0],[0,-1]])
-S=matrix([[1,0],[0,i]])
-T=matrix([[1,0],[0,exp(i*pi()/4)]])
+S=matrix([[1,0],[0,I]])
+T=matrix([[1,0],[0,exp(I*pi()/4)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
 Id=matrix.identity(2)
+GateTypes=[X,Y,Z,S,T,H]
+
+GatesDict={}
+
+def Gate(pos,n,GateType):
+	ID=[matrix([1])]
+	for i in range(n):
+		ID.append(i)
+		ID[i+1]=ID[i].tensor_product(Id)
+	OutGate=ID[pos].tensor_product(GateType).tensor_product(ID[n-(pos+1)])
+	return(OutGate)
 
 def CNOT(i,j,n):
 	XX=matrix([1])
@@ -26,8 +37,6 @@ def CNOT(i,j,n):
 		Y=Y.tensor_product(y)
 	U=XX+Y
 	return(U)
-
-
 
 
 #  Here is an older version of the CNOT I made which doesn't utilize 
