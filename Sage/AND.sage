@@ -1,4 +1,4 @@
-##  Creating the quantum AND gate
+##  Creating a quantum AND gate
 
 def AND(i=0):
 	if i==1:
