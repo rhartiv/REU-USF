@@ -48,7 +48,17 @@ def Circuit3(n):
 				for ii in range(n):
 					for jj in range(n):
 						for kk in range(n):
-							Circuits[GateLabel[i]+'{}'.format(ii)+','+GateLabel[j]+'{}'.format(jj)+','+GateLabel[k]+'{}'.format(kk)]=GatesDict[GateLabel[i]+'{}'.format(ii)]*GatesDict[GateLabel[j]+'{}'.format(jj)]*GatesDict[GateLabel[k]+'{}'.format(kk)]
+							Circuits[GateLabel[i]+'{}'.format(ii)+','+GateLabel[j]+'{}'.format(jj)+','+GateLabel[k]+'{}'.format(kk)]=GatesDict[GateLabel[i]+'{}'.format(ii)]*GatesDict[GateLabel[j]+'{}'.format(jj)]*GatesDict[GateLabel[k]+'{}'.format(kk)]			
+	
 	return Circuits
 
-
+def Optimize(Circuits):
+	OptimizedCircuits={}
+	for i in Circuits.keys():
+		if (i in [x for v in OptimizedCircuits.keys() for x in v])!=True:
+			L=copy([(k,v) for k,v in Circuits.items() if v==Circuits['{}'.format(i)]])
+			K=[]
+			for ii in range(len(L)):
+				K.append(L[ii][0])
+			OptimizedCircuits[tuple(K)]=L[0][1]
+	return OptimizedCircuits
