@@ -1,64 +1,74 @@
-## Generator of all length 3 circuits using common gates from the Gates.sage file,
-## for an input of "n" qubits.
 
 def Circuit3(n):
 	l=len(GateTypes)
-	Gates=[0]
+	Gates=[]
+	keys=[]
+	values=[]
+	CircuitKeys=[['Id']]
+	CircuitValues=[matrix.identity(2^n)]
+	Keys=['Id']
+	Values=[matrix.identity(2^n)]	
+	
+	print('Building Single-Qubit Gates')
 	for i in range(l):
 		Gates.append([GateTypes[i]])
-	Gates.remove(0)
-	GateLabel=['X','Y','Z','S','T','H','CNOT']
-	Circuits={'Id': matrix.identity(2^n)}
-	
 	for i in range(l):
 		for ii in range(n): 
 			Gates[i].append(Gate(ii,n,Gates[i][0]))
 			if Gates[i][0]==X:
-				for iii in range(1,n):
-					GatesDict['X{}'.format(ii)]=Gates[i][ii+1]
-			elif Gates[i][0]==Y:
-				for iii in range(1,n):
-					GatesDict['Y{}'.format(ii)]=Gates[i][ii+1]
-			elif Gates[i][0]==Z:
-				for iii in range(1,n):
-					GatesDict['Z{}'.format(ii)]=Gates[i][ii+1]
-			elif Gates[i][0]==S:
-				for iii in range(1,n):
-					GatesDict['S{}'.format(ii)]=Gates[i][ii+1]
-			elif Gates[i][0]==T:
-				for iii in range(1,n):
-					GatesDict['T{}'.format(ii)]=Gates[i][ii+1]
-			elif Gates[i][0]==H:
-				for iii in range(1,n):
-					GatesDict['H{}'.format(ii)]=Gates[i][ii+1]
+					Keys.append('X{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==Y:
+					Keys.append('Y{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==Z:
+					Keys.append('Z{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==S:
+					Keys.append('S{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==T:
+					Keys.append('T{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==H:
+					Keys.append('H{}'.format(ii))
+					Values.append(Gates[i][ii+1])
+			print('{}'.format(i/l*100)+'%')
+	print('Adding CNOT Gates')
 	for i in range(n):
 		for j in range(n):
 			if j!=i:
-				GatesDict['CNOT{},{}'.format(i,j)]=CNOT(i,j,n)
+				Keys.append('CNOT{},{}'.format(i,j))
+				Values.append(CNOT(i,j,n))
+		print('{}'.format(i/n*100)+'%')
+	print('Building All Circuits of Length 3')
+	ll=len(Keys)
+	for i in range(ll):
+		for j in range(ll):
+			for k in range(ll):
+				keys.append(Keys[i]+','+Keys[j]+','+Keys[k])
+				values.append(Values[i]*Values[j]*Values[k])
+		print('{}'.format(i/ll*100)+'%')
 	
-	for i in range(l):
-		for ii in range(n):
-			if (GatesDict[GateLabel[i]+'{}'.format(ii)] in Circuits.values())!=true:
-				Circuits[GateLabel[i]+'{}'.format(ii)]=GatesDict[GateLabel[i]+'{}'.format(ii)]
-		for j in range(l):
-			for ii in range(n):
-				for jj in range(n):
-					Circuits[GateLabel[i]+'{}'.format(ii)+','+GateLabel[j]+'{}'.format(jj)]=GatesDict[GateLabel[i]+'{}'.format(ii)]*GatesDict[GateLabel[j]+'{}'.format(jj)]
-			for k in range(l):
-				for ii in range(n):
-					for jj in range(n):
-						for kk in range(n):
-							Circuits[GateLabel[i]+'{}'.format(ii)+','+GateLabel[j]+'{}'.format(jj)+','+GateLabel[k]+'{}'.format(kk)]=GatesDict[GateLabel[i]+'{}'.format(ii)]*GatesDict[GateLabel[j]+'{}'.format(jj)]*GatesDict[GateLabel[k]+'{}'.format(kk)]			
+	print('Optimizing Circuit List')
+	m=len(keys)
+	k=0
+	for i in range(m):
+		M=values[i]
+		found=False
+		for j in range(len(CircuitValues)):
+			if M==CircuitValues[j]:
+				found=True
+				CircuitKeys[j].append(keys[i])
+				break
+		if found==False:
+			CircuitKeys.append([keys[i]])
+			CircuitValues.append(M)
+		if ((i/m)*100)>=(k+10):
+			k=k+10
+			print('{}'.format(i/m*100)+'%')
+		elif k>=90:
+			print('{}'.format(i/m*100)+'%')
+	OptimizedCircuits=[CircuitKeys,CircuitValues]
 	
-	return Circuits
-
-def Optimize(Circuits):
-	OptimizedCircuits={}
-	for i in Circuits.keys():
-		if (i in [x for v in OptimizedCircuits.keys() for x in v])!=True:
-			L=copy([(k,v) for k,v in Circuits.items() if v==Circuits['{}'.format(i)]])
-			K=[]
-			for ii in range(len(L)):
-				K.append(L[ii][0])
-			OptimizedCircuits[tuple(K)]=L[0][1]
 	return OptimizedCircuits
