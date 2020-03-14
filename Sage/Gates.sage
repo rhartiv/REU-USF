@@ -8,8 +8,6 @@ Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0
 Id=matrix.identity(2)
 GateTypes=[X,Y,Z,S,T,H]
 
-GatesDict={}
-
 def Gate(pos,n,GateType):
 	ID=[matrix([1])]
 	for i in range(n):
