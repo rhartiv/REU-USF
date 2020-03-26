@@ -1,9 +1,6 @@
-from time import process_time 
-import random
+## GENERATOR OF LENGTH 3 
 
-def Convert(string): 
-	li = list(string.split(",")) 
-	return li 
+from time import process_time 
 
 def Circuit3(n):
 	l=len(GateTypes)
@@ -14,7 +11,6 @@ def Circuit3(n):
 	CircuitValues=[]
 	Keys=['Id']
 	Values=[matrix.identity(2^n)]
-	randomlist=[]
 	
 	print('Building Single-Qubit Gates')
 	for i in range(l):
@@ -82,76 +78,17 @@ def Circuit3(n):
 	t1_end=process_time()
 	print('{}'.format(t1_end-t1_start)+' seconds')
 	
-	#  Performing Sanity Checks
+	OpRefined=[[],[]]
+	for i in range(len(OptimizedCircuits[0])):                         
+		OpRefined[0].append(OptimizedCircuits[0][i][0])
+		OpRefined[1].append(OptimizedCircuits[1][i])
 	
-	if len(OptimizedCircuits[0])!=len(OptimizedCircuits[1]):                                                
-		print('The number of circuits does not match the number of unitaries') 
-	else:                                   
-		print('The number of circuits matchs the number of unitaries')
+	return OptimizedCircuits	
 
-	
-	lll=0
-	for i in range(len(OptimizedCircuits[0])):
-		lll=lll+len(OptimizedCircuits[0][i])
-	if len(keys)!=lll:
-		print('The number of keys for all generated circuits is not equal to the number of keys for the optimized circuits')
-	else:
-		print('The number of keys for all generated circuits is equal to the number of keys for the optimized circuits')
-	
-	t2_start=process_time()
-	test=copy(OptimizedCircuits[1])                                                          
-	k=0
-	print('Testing for duplicate unitaries')
-	for i in range(len(OptimizedCircuits[1])):
-		while OptimizedCircuits[1][len(OptimizedCircuits[1])-(i+1)] in test:
-			test.remove(OptimizedCircuits[1][len(OptimizedCircuits[1])-(i+1)])
-		if len(test)!=(len(OptimizedCircuits[1])-(i+1)):
-			print('There is at least one duplicate unitary: ' '{}'.format(i))
-			break
-		if (i/len(OptimizedCircuits[1])*100)>=k+10:
-			k=k+10
-			print('{}'.format(k)+'%')
-		if i==(len(OptimizedCircuits[1])-1):
-			print('There are no duplicate unitaries')
-	t2_end=process_time()
-	print('{}'.format(t2_end-t2_start)+' seconds')
-	
-	print('Testing 500 random keys are equal to their values')
-	RandomTests=True
-	for i in range(500):
-		nn = random.randint(0,(len(OptimizedCircuits[0])-1))
-		nnn= random.randint(0,(len(OptimizedCircuits[0][nn])-1))
-		randomlist.append(OptimizedCircuits[0][nn][nnn])
-		value=OptimizedCircuits[1][nn]
-		a=Convert(OptimizedCircuits[0][nn][nnn])
-		for ii in range(len(a)):
-			a[ii]=Values[Keys.index(a[ii])]
-		valuea=a[0]*a[1]*a[2]
-		if value!=valuea:
-			print(OptimizedCircuits[0][nn][nnn], ' NOT EQUAL TO ', OptimizedCircuits[1][nn])
-			RandomTests=False
-			break
-		else:
-			print(OptimizedCircuits[0][nn][nnn], '=', OptimizedCircuits[1][nn])
-	if RandomTests==True:
-		print('All 500 random tests pass')
-	else:
-		print('Random test failed')
-	
-	
-	
-	return OptimizedCircuits
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+def Refine(OptimizedCircuits)
+	OpRefined=[[],[]]
+	for i in range(len(OptimizedCircuits[0])):                         
+		OpRefined[0].append(OptimizedCircuits[0][i][0])
+		OpRefined[1].append(OptimizedCircuits[1][i])
+
+	return OpRefined
