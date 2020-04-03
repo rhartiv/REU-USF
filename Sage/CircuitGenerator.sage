@@ -52,43 +52,26 @@ def Circuit3(n):
 				keys.append(Keys[i]+','+Keys[j]+','+Keys[k])
 				values.append(Values[i]*Values[j]*Values[k])
 		print('{}'.format(i/ll*100)+'%')
-	
-	
+		
 	t1_start=process_time()
 	print('Optimizing Circuit List')
 	m=len(keys)
 	k=0
 	for i in range(m):
-		M=values[i]
-		found=False
-		for j in range(len(CircuitValues)):
-			if M==CircuitValues[j]:
-				found=True
-				CircuitKeys[j].append(keys[i])
-				break
-		if found==False:
-			CircuitKeys.append([keys[i]])
-			CircuitValues.append(M)
 		if ((i/m)*100)>=(k+10):
 			k=k+10
 			print('{}'.format(k)+'%')
 		elif ((i/m)*100)>=99:
 			print('{}'.format(i/m*100)+'%')
+		M=values[i]
+		if M in CircuitValues:
+			continue
+		else:
+			CircuitKeys.append([keys[i]])
+			CircuitValues.append(M)
 	OptimizedCircuits=[CircuitKeys,CircuitValues]
 	t1_end=process_time()
 	print('{}'.format(t1_end-t1_start)+' seconds')
 	
-	OpRefined=[[],[]]
-	for i in range(len(OptimizedCircuits[0])):                         
-		OpRefined[0].append(OptimizedCircuits[0][i][0])
-		OpRefined[1].append(OptimizedCircuits[1][i])
+	return OptimizedCircuits
 	
-	return OptimizedCircuits	
-
-def Refine(OptimizedCircuits)
-	OpRefined=[[],[]]
-	for i in range(len(OptimizedCircuits[0])):                         
-		OpRefined[0].append(OptimizedCircuits[0][i][0])
-		OpRefined[1].append(OptimizedCircuits[1][i])
-
-	return OpRefined
