@@ -1,6 +1,8 @@
 ## GENERATOR OF LENGTH 3 
 
 from time import process_time 
+import multiprocessing as mp
+
 
 def Circuit3(n):
 	l=len(GateTypes)
@@ -67,11 +69,21 @@ def Circuit3(n):
 		if M in CircuitValues:
 			continue
 		else:
-			CircuitKeys.append([keys[i]])
+			CircuitKeys.append(keys[i])
 			CircuitValues.append(M)
 	OptimizedCircuits=[CircuitKeys,CircuitValues]
 	t1_end=process_time()
 	print('{}'.format(t1_end-t1_start)+' seconds')
 	
 	return OptimizedCircuits
+	
+	
+def GenLen3Circuits(n):
+
+	pool=mp.Pool(mp.cpu_count())
+	Op=pool.map(Circuit3, [n])
+	pool.close()
+	
+	return Op[0]
+	
 	
