@@ -70,12 +70,11 @@ def BuildG(n):
 #  original circuit list. Only we won't want to copy within this function, rather we'll
 #  do so later within the MitM function. 
 
-def ExpandBySQG(Op,SQG):
-
-	comlen=B[0][0].count(',')
+def ExpandBySQG(Op,SQG,B):
+	Expand_time_start=process_time()
 	k=0
 	t1_start=process_time()
-	
+	comlen=B[0][0].count(',')
 	for j in range(len(B[0])):
 	
 		#  For each unitary in the circuit list, we'll multiply by the SQG unitary
@@ -91,13 +90,11 @@ def ExpandBySQG(Op,SQG):
 		else:
 			Op[0].append(SQG[0]+','+B[0][j])
 			Op[1].append(AB)
-		if ((j/len(B[0]))*100)>=(k+5):
-			k=k+5
+		if ((j/len(B[0]))*100)>=(k+25):
+			k=k+25
 			print('{}'.format(k)+'%')
-		elif ((j/len(B[0]))*100)>=99:
-			print('{}'.format(j/len(B[0])*100)+'%')
-	t1_end=process_time()
-	print('{}'.format((t1_end-t1_start)+' seconds')
+	Expand_time_end=process_time()
+	print('{}'.format(Expand_time_end-Expand_time_start)+' seconds')
 	
 	#  And of course, we then return the updated circuit list
 	
@@ -106,11 +103,12 @@ def ExpandBySQG(Op,SQG):
 #  The next function is the meat and potatoes of this program, the actual Meet in the
 #  Middle function. As proposed in Amy's thesis, we'll have inputs of our target Unitary,
 #  and the cutoff length at which we should have found a collision. Note, we will build
-#  the single qubit gate-set proposed in the thesis using the function above within
+#  the single qubit gate-set proposed in the thesis using the functions above within
 #  this function.
 
 def MitM(U,l):
 	
+	MitM_time_start=process_time()
 	#  We fist determine the number of qubits by observing the size of the target unitary
 	
 	n=round(log(len(U[0]))/log(2))
@@ -122,16 +120,50 @@ def MitM(U,l):
 	CircuitList=Circuit3(n)
 	G=BuildG(n)
 	
-	#  We then test if our target is in the list, and iterate until either a collision is
-	#  found or we reach a depth of l/2
+	#  We then test if our target is in the list, and iterate the Expand function above 
+	#  until either a collision is found or we reach a depth of l/2
 	
 	comlen=2
-	for comlen<=(l/2):
+	while comlen< (l/2):
+		
+		TargetCircuit=0
+		
+		#  Creating a deepcopy ensures we our copy is unaffected by changing the Circuit list
+		
 		B=deepcopy(CircuitList)
-	 	pool=mp.Pool(mp.cpu_count())
-	 	CircuitList=pool.apply(ExpandBySQG, args=(B,G[ii][1]) for ii in range(len(G)))
-	 	for i in range(len(B[0])):
-	 		if (conjugate(transpose(B[1][i]))*U) in CircuitList[1]:
+		comlen=B[0][0].count(',')
+		
+		#  
+		print('No length '+'{}'.format(comlen+1)+' collisions, expanding to length '+'{}'.format(comlen+2))
+		for i in range(len(G)):
+			if U in CircuitList[1]:
+				TargetCircuit=CircuitList[0][CircuitList[1].index(U)]
+				break
+			else:
+				print('No collision found, adding all '+'{}'.format(G[i][0])+' elements')
+				ExpandBySQG(CircuitList,G[i],B)
+				continue
+		if type(TargetCircuit)==sage.rings.integer.Integer:
+			continue
+		break
+	MitM_time_end=process_time()
+	print('Total process time: '+'{}'.format(MitM_time_end-MitM_time_start)+' seconds')
+	
+	return TargetCircuit
+	
+
+def ParallelMitM(U,l):
+	MitM_time_start=process_time()
+	n=round(log(len(U[0]))/log(2))
+	CircuitList=Circuit3(n)
+	G=BuildG(n)
+	comlen=2
+	while comlen< (l/2):
+		B=deepcopy(CircuitList)
+		pool=mp.Pool(mp.cpu_count())
+		CircuitList=[pool.apply(ExpandBySQG, args=(CiruitList,G[ii],B)) for ii in range(len(G))]
+		for i in range(len(B[0])):
+			if (conjugate(transpose(B[1][i]))*U) in CircuitList[1]:
 				targetcircuit=B[0][i]+CircuitList[0][CircuitList[1].index(conjugate(transpose(B[1][i]))*U)]
 				pool.close()
 				break
@@ -144,7 +176,7 @@ def MitM(U,l):
 				break
 			else:
 				continue	
-	 	pool.close()
+		pool.close()
 	 			
 	 			
 			
