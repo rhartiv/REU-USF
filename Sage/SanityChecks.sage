@@ -116,3 +116,44 @@ def SanityChecks(Optimizedircuits):
 		print('All 500 random tests pass')
 	else:
 		print('Random test failed')
+		
+	
+		
+##  APPEDND DIFFICULTY CHECK
+
+def AppendDifficulty(n):
+	array=[]
+	avgtime=[]
+	for i in range(n):
+		RM=random_matrix(CDF,4,4)
+		time_start=process_time()
+		array.append(RM)
+		time_end=process_time()
+		time=time_end-time_start
+		avgtime.append(time)
+	
+	return mean(avgtime)
+	
+
+## COMPLEX MATRIX MULTIPLICATION DIFFICULTY
+def CompDiff(n):
+	array=[]
+	avgtime=[]
+	for i in range(n):
+		RM1=random_matrix(CDF,4,4)
+		RM2=random_matrix(CDF,4,4)
+		time_start=process_time()
+		RM1*RM2
+		time_end=process_time()
+		time=time_end-time_start
+		avgtime.append(time)
+	
+	return mean(avgtime)
+	
+	
+	
+	
+	
+	
+	
+	
