@@ -56,7 +56,7 @@ def Circuit3(n):
 		print('{}'.format(i/ll*100)+'%')
 		
 	t1_start=process_time()
-	print('Optimizing Circuit List')
+	print('Optimizing length 3 circuit list')
 	m=len(keys)
 	k=0
 	for i in range(m):
