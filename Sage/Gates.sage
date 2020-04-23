@@ -6,7 +6,8 @@ S=matrix([[1,0],[0,I]])
 T=matrix([[1,0],[0,exp(I*pi()/4)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
 Id=matrix.identity(2)
-GateTypes=[X,Y,Z,S,T,H]
+# GateTypes=[X,Y,Z,S,T,H]
+GateTypes=[S,H]
 
 def Gate(pos,n,GateType):
 	ID=[matrix([1])]
