@@ -156,7 +156,7 @@ def CompDiff(n):
 def CompSearch(n):
 	array=[]
 	avgtime=[]
-	for in in range n:
+	for i in range(n):
 		RM=random_matrix(CDF,4,4)
 		time_start=process_time()
 		if (RM in array)==False:
@@ -165,6 +165,7 @@ def CompSearch(n):
 		time=time_end-time_start
 		avgtime.append(time)
 	
+	return mean(avgtime)
 	
 	
 	
