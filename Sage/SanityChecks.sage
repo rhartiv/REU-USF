@@ -136,6 +136,7 @@ def AppendDifficulty(n):
 	
 
 ## COMPLEX MATRIX MULTIPLICATION DIFFICULTY
+
 def CompDiff(n):
 	array=[]
 	avgtime=[]
@@ -150,7 +151,19 @@ def CompDiff(n):
 	
 	return mean(avgtime)
 	
-	
+## CHECK LIST FOR COMPLEX MATRIX DIFFICULTY
+
+def CompSearch(n):
+	array=[]
+	avgtime=[]
+	for in in range n:
+		RM=random_matrix(CDF,4,4)
+		time_start=process_time()
+		if (RM in array)==False:
+			array.append(RM)
+		time_end=process_time()
+		time=time_end-time_start
+		avgtime.append(time)
 	
 	
 	
