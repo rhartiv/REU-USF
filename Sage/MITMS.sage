@@ -70,7 +70,7 @@ def BuildG(n):
 #  original circuit list. Only we won't want to copy within this function, rather we'll
 #  do so later within the MitM function. 
 
-def ExpandBySQG(Op,SQG,B):
+def ExpandBySQG(Op,B,U,SQG):
 	Expand_time_start=process_time()
 	k=0
 	t1_start=process_time()
@@ -81,10 +81,17 @@ def ExpandBySQG(Op,SQG,B):
 		
 		AB=SQG[1]*B[1][j]
 		
-		#  And if this product exists within the circuit list, we'll ensure the name of
+		#  And check if this is equal to our target, for which we will break and return
+		
+		if AB==U:
+			Op[0].append(SQG[0]+','+B[0][j])
+			Op[1].append(AB)
+			break
+		
+		#  If this product exists within the circuit list, we'll ensure the name of
 		#  the circuit reflects each gate used, else add it to the list.
 		
-		if AB in Op[1]:
+		elif AB in Op[1]:
 			if Op[0][Op[1].index(AB)].count(',')==comlen:
 				Op[0][Op[1].index(AB)]=SQG[0]+','+B[0][j]
 		else:
@@ -141,7 +148,7 @@ def MitM(U,l):
 				break
 			else:
 				print('No collision found, adding all '+'{}'.format(G[i][0])+' elements')
-				ExpandBySQG(CircuitList,G[i],B)
+				ExpandBySQG(CircuitList,B,U,G[i])
 				continue
 		if type(TargetCircuit)==sage.rings.integer.Integer:
 			continue
@@ -159,25 +166,23 @@ def ParallelMitM(U,l):
 	G=BuildG(n)
 	comlen=2
 	while comlen< (l/2):
+		TargetCircuit=0
+		
 		B=deepcopy(CircuitList)
-		pool=mp.Pool(mp.cpu_count())
-		CircuitList=[pool.apply(ExpandBySQG, args=(CiruitList,G[ii],B)) for ii in range(len(G))]
-		for i in range(len(B[0])):
-			if (conjugate(transpose(B[1][i]))*U) in CircuitList[1]:
-				targetcircuit=B[0][i]+CircuitList[0][CircuitList[1].index(conjugate(transpose(B[1][i]))*U)]
-				pool.close()
-				break
-			else:
-				continue
-		for i in range(len(CircuitList[0])):
-			if (conjugate(transpose(CircuitList[1][i]))*U) in CircuitList[1]:
-				targetcircuit=CircuitList[0][i]+CircuitList[0][CircuitList[1].index(conjugate(transpose(CircuitList[1][i]))*U)]
-				pool.close()
-				break
-			else:
-				continue	
-		pool.close()
-	 			
+		comlen=B[0][0].count(',')
+		
+		print('No length '+'{}'.format(comlen+1)+' collisions, expanding to length '+'{}'.format(comlen+2))
+		
+		if U in CircuitList[1]:
+			TargetCircuit=CircuitList[0][CircuitList[1].index(U)]
+			break
+		else:
+			pool=mp.Pool(mp.cpu_count())
+			CircuitList=[pool.apply(ExpandBySQG, args=(CiruitList,B,U,G[ii])) for ii in range(len(G))]
+			pool.close()
+		if type(TargetCircuit)==sage.rings.integer.Integer:
+	 		continue
+		break
 	 			
 			
 				
