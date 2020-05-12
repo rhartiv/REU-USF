@@ -178,7 +178,7 @@ def ParallelMitM(U,l):
 			break
 		else:
 			pool=mp.Pool(mp.cpu_count())
-			CircuitList=[pool.apply(ExpandBySQG, args=(CiruitList,B,U,G[ii])) for ii in range(len(G))]
+			CircuitList=[pool.apply(ExpandBySQG, args=(CircuitList,B,U,G[ii])) for ii in range(len(G))]
 			pool.close()
 		if type(TargetCircuit)==sage.rings.integer.Integer:
 	 		continue
