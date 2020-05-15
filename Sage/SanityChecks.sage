@@ -158,14 +158,17 @@ def CompSearchList(n):
 	avgtime=[]
 	for i in range(n):
 		RM=random_matrix(CDF,4,4)
+		array.append(RM)
+	for i in range(1000):
+		RM=random_matrix(CDF,4,4)
 		time_start=process_time()
-		if (RM in array)==False:
-			array.append(RM)
+		if (RM in array)==True:
+			print(RM)
 		time_end=process_time()
 		time=time_end-time_start
 		avgtime.append(time)
 	
-	return [mean(avgtime),time]
+	return [mean(avgtime),max(avgtime)]
 	
 ## CHECK DICTIONARY FOR COMPLEX MATRIX DICFFICULTY
 
@@ -174,12 +177,15 @@ def CompSearchDict(n):
 	avgtime=[]
 	for i in range(n):
 		RM=random_matrix(CDF,4,4)
+		Dict[i]=RM
+	for i in range(1000):
+		RM=random_matrix(CDF,4,4)
 		time_start=process_time()
-		if (RM in Dict.values())==False:
-			Dict[i]=RM
+		if (RM in Dict.values())==True:
+			print(RM)
 		time_end=process_time()
 		time=time_end-time_start
 		avgtime.append(time)
 	
-	return [mean(avgtime),time]
+	return [mean(avgtime),max(avgtime)]
 
