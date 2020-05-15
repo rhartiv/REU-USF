@@ -76,30 +76,36 @@ def ExpandBySQG(Op,B,U,SQG):
 	t1_start=process_time()
 	comlen=B[0][0].count(',')
 	for j in range(len(B[0])):
-	
+		if ((j/len(B[0]))*100)>=(k+25):
+			k=k+25
+			print('{}'.format(k)+'%')
+			
 		#  For each unitary in the circuit list, we'll multiply by the SQG unitary
 		
 		AB=SQG[1]*B[1][j]
 		
-		#  And check if this is equal to our target, for which we will break and return
-		
 		if AB==U:
 			Op[0].append(SQG[0]+','+B[0][j])
-			Op[1].append(AB)
+			Op[1].append(AB)	
 			break
+		
+		#  And check if this is equal to our target, for which we will break and return
+		if AB in Op[1]:
+			if Op[0][Op[1].index(AB)].count(',')==comlen:
+				Op[0][Op[1].index(AB)]=SQG[0]+','+B[0][j]
+			continue
+		else:
+			Op[0].append(SQG[0]+','+B[0][j])
+			Op[1].append(AB)					
+			continue
+		break
 		
 		#  If this product exists within the circuit list, we'll ensure the name of
 		#  the circuit reflects each gate used, else add it to the list.
 		
-		elif AB in Op[1]:
-			if Op[0][Op[1].index(AB)].count(',')==comlen:
-				Op[0][Op[1].index(AB)]=SQG[0]+','+B[0][j]
-		else:
-			Op[0].append(SQG[0]+','+B[0][j])
-			Op[1].append(AB)
-		if ((j/len(B[0]))*100)>=(k+25):
-			k=k+25
-			print('{}'.format(k)+'%')
+
+
+
 	Expand_time_end=process_time()
 	print('{}'.format(Expand_time_end-Expand_time_start)+' seconds')
 	
@@ -173,27 +179,31 @@ def ParallelMitM(U,l):
 		
 		print('No length '+'{}'.format(comlen+1)+' collisions, expanding to length '+'{}'.format(comlen+2))
 		
+
+		pool=mp.Pool(mp.cpu_count())
+		CircuitList=[pool.apply(ExpandBySQG, args=(CircuitList,B,U,G[ii])) for ii in range(len(G))]
+		pool.close()
 		if U in CircuitList[1]:
 			TargetCircuit=CircuitList[0][CircuitList[1].index(U)]
 			break
 		else:
-			pool=mp.Pool(mp.cpu_count())
-			CircuitList=[pool.apply(ExpandBySQG, args=(CircuitList,B,U,G[ii])) for ii in range(len(G))]
-			pool.close()
-		if type(TargetCircuit)==sage.rings.integer.Integer:
-	 		continue
+			continue		
 		break
-	 			
-			
-				
+	MitM_time_end=process_time()
+	print('Total process time: '+'{}'.format(MitM_time_end-MitM_time_start)+' seconds')
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	return TargetCircuit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
