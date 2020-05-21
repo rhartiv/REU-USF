@@ -14,10 +14,12 @@ def Gate(pos,n,GateType):
 	for i in range(n):
 		ID.append(i)
 		ID[i+1]=ID[i].tensor_product(Id)
-	OutGate=ID[pos].tensor_product(GateType).tensor_product(ID[n-(pos+1)])
+	OutGate=ID[n-(pos+1)].tensor_product(GateType).tensor_product(ID[pos])
 	return(OutGate)
 
 def CNOT(i,j,n):
+	i=n-i-1
+	j=n-j-1
 	XX=matrix([1])
 	Y=matrix([1])
 	zero=vector([1,0])
@@ -37,6 +39,10 @@ def CNOT(i,j,n):
 	U=XX+Y
 	return(U)
 
+def SWAP(i,j,n):
+	U=CNOT(i,j,n)*CNOT(j,i,n)*CNOT(i,j,n)
+	return(U)
+	
 
 #  Here is an older version of the CNOT I made which doesn't utilize 
 #  the outer_product sage command:
