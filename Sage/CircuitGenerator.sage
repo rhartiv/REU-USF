@@ -13,6 +13,7 @@ def Circuit3(n):
 	CircuitValues=[]
 	Keys=['Id']
 	Values=[matrix.identity(2^n)]
+	PM=PermMatrices(n)
 	
 	print('Building Single-Qubit Gates')
 	for i in range(l):
@@ -60,15 +61,20 @@ def Circuit3(n):
 	m=len(keys)
 	k=0
 	for i in range(m):
+		flag=True
 		if ((i/m)*100)>=(k+10):
 			k=k+10
 			print('{}'.format(k)+'%')
 		elif ((i/m)*100)>=99:
 			print('{}'.format(i/m*100)+'%')
 		M=values[i]
-		if M in CircuitValues:
-			continue
-		else:
+		for ii in range(len(PM)):
+			if (PM[ii]*M*PM[ii]) in CircuitValues:
+				flag=False
+				break
+			else:
+				continue
+		if flag==True:
 			CircuitKeys.append(keys[i])
 			CircuitValues.append(M)
 	OptimizedCircuits=[CircuitKeys,CircuitValues]
