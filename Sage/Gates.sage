@@ -42,7 +42,32 @@ def CNOT(i,j,n):
 def SWAP(i,j,n):
 	U=CNOT(i,j,n)*CNOT(j,i,n)*CNOT(i,j,n)
 	return(U)
+
+def PermMatrices(n):
+	IdElem=matrix.identity(2^n)
+	FinalList=[]
+	cycles=[]
+	swaps=[]
+	ProductList=[]
 	
+	Perms=list(Permutations(n))
+	for i in range(len(Perms)):
+		cycles.append(Perms[i].cycle_tuples())
+	for i in range(len(cycles)):
+		swaps.append([])
+		for ii in range(len(cycles[i])):
+			if len(cycles[i][ii])==2:
+				swaps[i].append(cycles[i][ii])
+			elif len(cycles[i][ii])>2:
+				for iii in range(len(cycles[i][ii])-1):
+					swaps[i].append((cycles[i][ii][iii],cycles[i][ii][iii+1]))
+	
+	for i in range(len(swaps)):
+		FinalList.append(IdElem)
+		for ii in range(len(swaps[i])):
+			FinalList[i]=SWAP(swaps[i][ii][0]-1,swaps[i][ii][1]-1,n)*FinalList[i]
+	
+	return(FinalList)
 
 #  Here is an older version of the CNOT I made which doesn't utilize 
 #  the outer_product sage command:
