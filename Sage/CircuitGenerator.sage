@@ -55,7 +55,9 @@ def Circuit3(n):
 				keys.append(Keys[i]+','+Keys[j]+','+Keys[k])
 				values.append(Values[i]*Values[j]*Values[k])
 		print('{}'.format(i/ll*100)+'%')
-		
+	
+	
+	
 	t1_start=process_time()
 	print('Optimizing length 3 circuit list')
 	m=len(keys)
