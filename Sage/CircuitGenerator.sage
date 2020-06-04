@@ -5,10 +5,13 @@ import multiprocessing as mp
 
 
 def Circuit3(n):
+	t1_start=process_time()
 	l=len(GateTypes)
 	Gates=[]
 	keys=[]
 	values=[]
+	
+	FinalCircuits={}
 	CircuitKeys=[]
 	CircuitValues=[]
 	Keys=['Id']
@@ -56,9 +59,11 @@ def Circuit3(n):
 				values.append(Values[i]*Values[j]*Values[k])
 		print('{}'.format(i/ll*100)+'%')
 	
+	for i in values:
+		i=i.set_immutable()
 	
+	Circuits=dict(zip(keys,values))
 	
-	t1_start=process_time()
 	print('Optimizing length 3 circuit list')
 	m=len(keys)
 	k=0
@@ -71,19 +76,19 @@ def Circuit3(n):
 			print('{}'.format(i/m*100)+'%')
 		M=values[i]
 		for ii in range(len(PM)):
-			if (PM[ii]*M*PM[ii]) in CircuitValues:
+			Perm=(PM[ii]*M*PM[ii])
+			Perm.set_immutable()
+			if Perm in FinalCircuits:
 				flag=False
 				break
 			else:
 				continue
 		if flag==True:
-			CircuitKeys.append(keys[i])
-			CircuitValues.append(M)
-	OptimizedCircuits=[CircuitKeys,CircuitValues]
+			FinalCircuits[M]=keys[i]
 	t1_end=process_time()
 	print('{}'.format(t1_end-t1_start)+' seconds')
 	
-	return OptimizedCircuits
+	return FinalCircuits
 	
 	
 def GenLen3Circuits(n):
