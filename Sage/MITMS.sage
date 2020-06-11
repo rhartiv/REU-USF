@@ -198,12 +198,6 @@ def ParallelMitM(U,l):
 
 
 
-def AmplitudeCheck(A,B):
-	if 
-
-
-
-
 
 
 
