@@ -8,6 +8,9 @@ Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0
 Id=matrix.identity(2)
 # GateTypes=[X,Y,Z,S,T,H]
 GateTypes=[S,H]
+X0=Id.tensor_product(X)
+X0.set_immutable()
+
 
 def Gate(pos,n,GateType):
 	ID=[matrix([1])]
