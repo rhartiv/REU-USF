@@ -39,6 +39,9 @@ def Circuit3(n):
 			if Gates[i][0]==T:
 					Keys.append('T{}'.format(ii))
 					Values.append(Gates[i][ii+1])
+			if Gates[i][0]==conjugate(transpose(T)):
+					Keys.append('T^{}'.format(ii))
+					Values.append(Gates[i][ii+1])
 			if Gates[i][0]==H:
 					Keys.append('H{}'.format(ii))
 					Values.append(Gates[i][ii+1])
