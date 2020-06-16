@@ -67,7 +67,7 @@ def TupleG(G,A,B,U):
 	return TupleList
 		
 
-@parallel
+@parallel(4)
 def ExpandBySQG(SQG,Op,B,U):
 	Expand_time_start=process_time()
 	k=0
