@@ -1,3 +1,5 @@
+from time import process_time 
+
 # NEW parallel MitM using dictionaries instead of lists
 def BuildG(n):
 	
@@ -54,8 +56,18 @@ def BuildG(n):
 	
 	#  Then return our desired gate-set
 	
-	return SQGs
+	return sorted(SQGs)
 	
+def TupleG(G,A,B,U):
+	TupleList=[]
+	for i in G:
+		Tuple=tuple([i,A,B,U])
+		TupleList.append(Tuple)
+		
+	return TupleList
+		
+
+@parallel
 def ExpandBySQG(SQG,Op,B,U):
 	Expand_time_start=process_time()
 	k=0
@@ -88,6 +100,38 @@ def ExpandBySQG(SQG,Op,B,U):
 	print('{}'.format(Expand_time_end-Expand_time_start)+' seconds')
 
 	return Op
+
+def MitM(U,l):
+	MitM_time_start=process_time()
+	n=round(log(len(U[0]))/log(2))
+	P=PermMatrices(n)
+	CircuitList=Circuit3(n)
+	G=BuildG(n)
+	comlen=2
+	while comlen< (l/2):
+		TargetCircuit=0
+		B=deepcopy(CircuitList)
+		Tuples=TupleG(G,CircuitList,B,U)
+		comlen=B[1].count(',')
+		for X,Y in sorted(list(ExpandBySQG(Tuples))): CircuitList.update(Y)
+		for i in range(len(P)):
+			for ii in CircuitList:
+				Pii=P[i]*ii*P[i]
+				Pii.set_immutable()
+				if U==Pii:
+					TargetCircuit=CircuitList[Pii]
+					break
+				else:
+					continue
+			if TargetCircuit==0:
+				continue
+			else:
+				break
+		if TargetCircuit==0:
+			continue
+		else:
+			break
+	MitM_time_end=process_time()
+	print('Total process time: '+'{}'.format(MitM_time_end-MitM_time_start)+' seconds')
 	
-	
-	
+	return TargetCircuit
