@@ -7,7 +7,7 @@ T=matrix([[1,0],[0,exp(I*pi()/4)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
 Id=matrix.identity(2)
 # GateTypes=[X,Y,Z,S,T,H]
-GateTypes=[S,H]
+GateTypes=[S,H,T,conjugate(transpose(T))]
 X0=Id.tensor_product(X)
 X0.set_immutable()
 
