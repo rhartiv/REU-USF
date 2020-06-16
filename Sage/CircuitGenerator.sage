@@ -1,7 +1,6 @@
 ## GENERATOR OF LENGTH 3 
 
-from time import process_time 
-import multiprocessing as mp
+from time import process_time
 
 
 def Circuit3(n):
@@ -12,8 +11,6 @@ def Circuit3(n):
 	values=[]
 	
 	FinalCircuits={}
-	CircuitKeys=[]
-	CircuitValues=[]
 	Keys=['Id']
 	Values=[matrix.identity(2^n)]
 	PM=PermMatrices(n)
@@ -53,53 +50,27 @@ def Circuit3(n):
 				Keys.append('CNOT({} {})'.format(i,j))
 				Values.append(CNOT(i,j,n))
 		print('{}'.format(i/n*100)+'%')
-	print('Building All Circuits of Length 3')
+	print('Building List of Length 3 Circuits')
 	ll=len(Keys)
+	
 	for i in range(ll):
 		for j in range(ll):
 			for k in range(ll):
-				keys.append(Keys[i]+','+Keys[j]+','+Keys[k])
-				values.append(Values[i]*Values[j]*Values[k])
+				Flag=0
+				M=Values[i]*Values[j]*Values[k]
+				M.set_immutable()
+				Label=Keys[i]+','+Keys[j]+','+Keys[k]
+				for l in range(len(PM)):
+					PMM=PM[l]*M*PM[l]
+					PMM.set_immutable()
+					if PMM in FinalCircuits:
+						Flag=1
+				if Flag==0:
+					FinalCircuits[M]=Label
 		print('{}'.format(i/ll*100)+'%')
-	
-	for i in values:
-		i=i.set_immutable()
-	
-	Circuits=dict(zip(keys,values))
-	
-	print('Optimizing length 3 circuit list')
-	m=len(keys)
-	k=0
-	for i in range(m):
-		flag=True
-		if ((i/m)*100)>=(k+10):
-			k=k+10
-			print('{}'.format(k)+'%')
-		elif ((i/m)*100)>=99:
-			print('{}'.format(i/m*100)+'%')
-		M=values[i]
-		for ii in range(len(PM)):
-			Perm=(PM[ii]*M*PM[ii])
-			Perm.set_immutable()
-			if Perm in FinalCircuits:
-				flag=False
-				break
-			else:
-				continue
-		if flag==True:
-			FinalCircuits[M]=keys[i]
-	t1_end=process_time()
-	print('{}'.format(t1_end-t1_start)+' seconds')
+	t1_stop=process_time()
+	print('{}'.format(t1_stop-t1_start)+' seconds')
 	
 	return FinalCircuits
-	
-	
-def GenLen3Circuits(n):
-
-	pool=mp.Pool(mp.cpu_count())
-	Op=pool.map(Circuit3, [n])
-	pool.close()
-	
-	return Op[0]
 	
 	
