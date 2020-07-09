@@ -1,14 +1,15 @@
+
 H=(1/sqrt(2))*matrix([[1,1],[1,-1]])
 X=matrix([[0,1],[1,0]])
 Y=matrix([[0,-I],[I,0]])
 Z=matrix([[1,0],[0,-1]])
 S=matrix([[1,0],[0,I]])
-T=matrix([[1,0],[0,exp(I*pi()/4)]])
+T=matrix([[1,0],[0,(1/2*I + 1/2)*sqrt(2)]])
 Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
 Id=matrix.identity(2)
 # GateTypes=[X,Y,Z,S,T,H]
 GateTypes=[H,S]
-X0=Id.tensor_product(X.tensor_product(Id))
+X0=Id.tensor_product(X)
 X0.set_immutable()
 
 
@@ -71,6 +72,9 @@ def PermMatrices(n):
 			FinalList[i]=SWAP(swaps[i][ii][0]-1,swaps[i][ii][1]-1,n)*FinalList[i]
 	
 	return(FinalList)
+	
+# def RelativePhase(Gate)
+	
 
 #  Here is an older version of the CNOT I made which doesn't utilize 
 #  the outer_product sage command:
