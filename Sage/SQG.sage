@@ -32,15 +32,46 @@ def CNOT(i,j,n):
 			x=zero.outer_product(zero)
 			y=one.outer_product(one)
 		elif ii==j:
-			x=Id
-			y=X
+			x=Id[1]
+			y=X[1]
 		else:
-			x=Id
-			y=Id
+			x=Id[1]
+			y=Id[1]
 		XX=XX.tensor_product(x)
 		Y=Y.tensor_product(y)
 	U=XX+Y
 	return(U)
+	
+def SWAP(i,j,n):
+	U=CNOT(i,j,n)*CNOT(j,i,n)*CNOT(i,j,n)
+	return(U)
+
+
+def PermMatrices(n):
+	IdElem=matrix.identity(2^n)
+	FinalList=[]
+	cycles=[]
+	swaps=[]
+	ProductList=[]
+	
+	Perms=list(Permutations(n))
+	for i in range(len(Perms)):
+		cycles.append(Perms[i].cycle_tuples())
+	for i in range(len(cycles)):
+		swaps.append([])
+		for ii in range(len(cycles[i])):
+			if len(cycles[i][ii])==2:
+				swaps[i].append(cycles[i][ii])
+			elif len(cycles[i][ii])>2:
+				for iii in range(len(cycles[i][ii])-1):
+					swaps[i].append((cycles[i][ii][iii],cycles[i][ii][iii+1]))
+	
+	for i in range(len(swaps)):
+		FinalList.append(IdElem)
+		for ii in range(len(swaps[i])):
+			FinalList[i]=SWAP(swaps[i][ii][0]-1,swaps[i][ii][1]-1,n)*FinalList[i]
+	
+	return(FinalList)
 
 def BuildG(n):
 	
@@ -48,41 +79,40 @@ def BuildG(n):
 	#  GateTypes are standard Clifford+T gates, located in the Gates.sage file
 	
 	l=len(GateTypes)
-	# n=round(log(len(Op[1][0][0]))/log(2))
-	Gates=[]
-	G=[]
-	G.append(['Id'])
-	G.append([matrix.identity(2^n)])
-	SQGs=[]
 	
 	print('Building Single-Qubit Gates')
 	
 	# First we'll make the length one circuits
-	L1=[]
+	L1=[['Id',matrix.identity(2^n)]]
 	for i in range(n):
 		for ii in range(l):
 			L1.append(Gate(i,n,GateTypes[ii]))
 	
-	# Next we'll expand that to all depth one circuits, i.e. single quantum gates
+
+
+	L=[['Id',matrix.identity(2^n)]]       
+	P=PermMatrices(n)
+	LMats=[matrix.identity(2^n)]
+	for i in range(len(L1)):
+		for ii in range(len(L1)):
+			flag=0
+			TestElement=[L1[i][0]+L1[ii][0],L1[i][1]*L1[ii][1]]
+			count=[]
+			for nn in range(n):
+				count.append(TestElement[0].count('{}'.format(nn)))
+			for iii in count:
+				if iii>1:
+					flag=1
+			if flag==0:
+				flag2=0
+				for pp in P:
+					perm=TestElement[1]*pp
+					if perm in LMats:
+						if perm!=TestElement[1]:
+							flag2=1
+				if flag2==0:
+					L.append([L1[i][0]+L1[ii][0],Product])
+					LMats.append(Product)
+
 	
-	#L2=[]
-	#for i in range(len(L1)/2):
-	#	L2.append(L1[2*i]+
-		
-		
-	
-	#  And we will add to that set each 2-qubit CNOT gate for our n
-	
-	#print('Adding CNOT Gates')
-	#for i in range(n):
-	#	for j in range(n):
-	#		if j!=i:
-	#			G[0].append('CNOT({} {})'.format(i,j))
-	#			G[1].append(CNOT(i,j,n))
-	#	print('{}'.format(i/n*100)+'%')
-	#for i in range(len(G[0])):
-	#	SQGs.append([G[0][i],G[1][i]])
-	
-	#  Then return our desired gate-set
-	
-	return sorted(L1)
+	return sorted(L)
