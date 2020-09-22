@@ -1,3 +1,4 @@
+import itertools
 H=['H',(1/sqrt(2))*matrix([[1,1],[1,-1]])]
 X=['X',matrix([[0,1],[1,0]])]
 Y=['Y',matrix([[0,-I],[I,0]])]
@@ -17,8 +18,31 @@ def Gate(pos,n,GateType):
 	for i in range(n):
 		ID.append(i)
 		ID[i+1]=ID[i].tensor_product(Id[1])
-	OutGate=[GateType[0]+'{}'.format(pos),ID[n-(pos+1)].tensor_product(GateType[1]).tensor_product(ID[pos])]
+	OutGate=ID[n-(pos+1)].tensor_product(GateType[1]).tensor_product(ID[pos])
 	return(OutGate)
+
+def BuildG(n):
+	L=[]
+	L2=[]
+	for i in range(n):
+		L.append([])
+		for ii in GateTypes:
+			L[i].append(ii[0])
+		for ii in itertools.product(*L):
+			if sorted(ii) not in L2:
+				L2.append(list(ii))
+	L3=[]
+	for i in range(len(L2)):
+		NumOfGates=len(L2[i])
+		SQG=matrix.identity(2^n)
+		for ii in range(NumOfGates):
+			pos=ii
+			for iii in range(len(GateTypes)):
+				if L2[i][ii] in GateTypes[iii]:
+					G=Gate(pos,n,GateTypes[iii])
+			SQG=SQG*G
+		L3.append([''.join(L2[i]),SQG])
+	return(L3)
 
 def CNOT(i,j,n):
 	i=n-i-1
@@ -41,78 +65,3 @@ def CNOT(i,j,n):
 		Y=Y.tensor_product(y)
 	U=XX+Y
 	return(U)
-	
-def SWAP(i,j,n):
-	U=CNOT(i,j,n)*CNOT(j,i,n)*CNOT(i,j,n)
-	return(U)
-
-
-def PermMatrices(n):
-	IdElem=matrix.identity(2^n)
-	FinalList=[]
-	cycles=[]
-	swaps=[]
-	ProductList=[]
-	
-	Perms=list(Permutations(n))
-	for i in range(len(Perms)):
-		cycles.append(Perms[i].cycle_tuples())
-	for i in range(len(cycles)):
-		swaps.append([])
-		for ii in range(len(cycles[i])):
-			if len(cycles[i][ii])==2:
-				swaps[i].append(cycles[i][ii])
-			elif len(cycles[i][ii])>2:
-				for iii in range(len(cycles[i][ii])-1):
-					swaps[i].append((cycles[i][ii][iii],cycles[i][ii][iii+1]))
-	
-	for i in range(len(swaps)):
-		FinalList.append(IdElem)
-		for ii in range(len(swaps[i])):
-			FinalList[i]=SWAP(swaps[i][ii][0]-1,swaps[i][ii][1]-1,n)*FinalList[i]
-	
-	return(FinalList)
-
-def BuildG(n):
-	
-	#  n is the input number of qubits,
-	#  GateTypes are standard Clifford+T gates, located in the Gates.sage file
-	
-	l=len(GateTypes)
-	
-	print('Building Single-Qubit Gates')
-	
-	# First we'll make the length one circuits
-	L1=[['Id',matrix.identity(2^n)]]
-	for i in range(n):
-		for ii in range(l):
-			L1.append(Gate(i,n,GateTypes[ii]))
-	
-
-
-	L=[['Id',matrix.identity(2^n)]]       
-	P=PermMatrices(n)
-	LMats=[matrix.identity(2^n)]
-	for i in range(len(L1)):
-		for ii in range(len(L1)):
-			flag=0
-			TestElement=[L1[i][0]+L1[ii][0],L1[i][1]*L1[ii][1]]
-			count=[]
-			for nn in range(n):
-				count.append(TestElement[0].count('{}'.format(nn)))
-			for iii in count:
-				if iii>1:
-					flag=1
-			if flag==0:
-				flag2=0
-				for pp in P:
-					perm=TestElement[1]*pp
-					if perm in LMats:
-						if perm!=TestElement[1]:
-							flag2=1
-				if flag2==0:
-					L.append([L1[i][0]+L1[ii][0],Product])
-					LMats.append(Product)
-
-	
-	return sorted(L)
