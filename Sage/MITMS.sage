@@ -60,9 +60,20 @@ def TME(A,l):
 		test=false
 	return test
 	
-	
-# ExpandBySQG
+def SplitToTwos(lst):
+	out=[]
+	for i in range(0,len(lst),2):
+		out.append(lst[i:i+2])
+	return out
+
 @parallel(4)
+def Combine(lst):
+	lst2=lst[0]
+	lst2.update(lst[1])
+	return lst2
+
+# ExpandBySQG
+@parallel(8)
 def ExpandBySQG(SQG,dict,copydict,Target):
 	P=PermMatrices(round(log(len(Target[0]))/log(2)))
 	for i in copydict:
@@ -90,7 +101,13 @@ def MitM(Target,a,depth):
 	while comlen<(depth-1):
 		CopyCircuits=deepcopy(Circuits)
 		Tuples=TupleG(G,Circuits,CopyCircuits,Target)
-		for X,Y in sorted(list(ExpandBySQG(Tuples))): Circuits.update(Y)
+		UpdaterList=[]
+		for Input,Output in sorted(list(ExpandBySQG(Tuples))): UpdaterList.append(Output)
+		while len(UpdaterList)>1:
+			SplitList=SplitToTwos(UpdaterList)
+			UpdaterList=[]
+			for In,Out in Combine(SplitList): UpdaterList.append(Out)
+		Circuits.update(UpdaterList[0])
 		for i in range(len(P)):
 			for ii in Circuits:
 				Pii=P[i]*ii*P[i]
@@ -101,4 +118,5 @@ def MitM(Target,a,depth):
 				else:
 					continue
 		comlen += 1
+	print(TargetCircuits)
 	return TargetCircuits
