@@ -1,31 +1,30 @@
-
-H=(1/sqrt(2))*matrix([[1,1],[1,-1]])
-X=matrix([[0,1],[1,0]])
-Y=matrix([[0,-I],[I,0]])
-Z=matrix([[1,0],[0,-1]])
-S=matrix([[1,0],[0,I]])
-T=matrix([[1,0],[0,(1/2*I + 1/2)*sqrt(2)]])
-Toffoli=matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])
-Id=matrix.identity(2)
+H=['H',(1/sqrt(2))*matrix([[1,1],[1,-1]])]
+X=['X',matrix([[0,1],[1,0]])]
+Y=['Y',matrix([[0,-I],[I,0]])]
+Z=['Z',matrix([[1,0],[0,-1]])]
+S=['S',matrix([[1,0],[0,I]])]
+T=['T',matrix([[1,0],[0,(1/2*I + 1/2)*sqrt(2)]])]
+Toffoli=['Toffoli',matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])]
+Id=['Id',matrix.identity(2)]
 # GateTypes=[X,Y,Z,S,T,H]
-GateTypes=[H,S]
-X0=Id.tensor_product(X)
-X0.set_immutable()
+GateTypes=sorted([H,S])
+X0=['X0',Id[1].tensor_product(X[1])]
+X0[1].set_immutable()
 
 
 def Gate(pos,n,GateType):
 	ID=[matrix([1])]
 	for i in range(n):
 		ID.append(i)
-		ID[i+1]=ID[i].tensor_product(Id)
-	OutGate=ID[n-(pos+1)].tensor_product(GateType).tensor_product(ID[pos])
+		ID[i+1]=ID[i].tensor_product(Id[1])
+	OutGate=[GateType[0]+'{}'.format(pos),ID[n-(pos+1)].tensor_product(GateType[1]).tensor_product(ID[pos])]
 	return(OutGate)
 
 def CNOT(i,j,n):
 	i=n-i-1
 	j=n-j-1
 	XX=matrix([1])
-	Y=matrix([1])
+	YY=matrix([1])
 	zero=vector([1,0])
 	one=vector([0,1])
 	for ii in range(n):
@@ -33,14 +32,14 @@ def CNOT(i,j,n):
 			x=zero.outer_product(zero)
 			y=one.outer_product(one)
 		elif ii==j:
-			x=Id
-			y=X
+			x=Id[1]
+			y=X[1]
 		else:
-			x=Id
-			y=Id
+			x=Id[1]
+			y=Id[1]
 		XX=XX.tensor_product(x)
-		Y=Y.tensor_product(y)
-	U=XX+Y
+		YY=YY.tensor_product(y)
+	U=XX+YY
 	return(U)
 
 def SWAP(i,j,n):
