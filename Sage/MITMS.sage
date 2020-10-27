@@ -59,21 +59,24 @@ def TME(A,l):
 	if A==matrix.identity(len(list(A))):
 		test=false
 	return test
-	
+
 def SplitToTwos(lst):
 	out=[]
 	for i in range(0,len(lst),2):
 		out.append(lst[i:i+2])
 	return out
 
-@parallel(4)
+@parallel(16)
 def Combine(lst):
-	lst2=lst[0]
-	lst2.update(lst[1])
+	if len(lst)%2==1:
+		lst2=lst[0]
+	else:
+		lst2=lst[0]
+		lst2.update(lst[1])
 	return lst2
 
 # ExpandBySQG
-@parallel(8)
+@parallel(32)
 def ExpandBySQG(SQG,dict,copydict,Target):
 	P=PermMatrices(round(log(len(Target[0]))/log(2)))
 	for i in copydict:
