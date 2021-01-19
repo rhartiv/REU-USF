@@ -1,7 +1,8 @@
 ##  New MitM
 import itertools
-from time import time
-
+import time
+import multiprocessing
+CORECOUNT=multiprocessing.cpu_count()
 
 ##  List of common gates as a list containing their standard symbol and single-qubit unitaries
 H=['H',(1/sqrt(2))*matrix([[1,1],[1,-1]])]
@@ -11,7 +12,7 @@ Z=['Z',matrix([[1,0],[0,-1]])]
 S=['S',matrix([[1,0],[0,I]])]
 T=['T',matrix([[1,0],[0,(1/2*I + 1/2)*sqrt(2)]])]
 Toffoli=['Toffoli',matrix([[1,0,0,0,0,0,0,0],[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1],[0,0,0,0,0,0,1,0]])]
-Id=['Id',matrix.identity(2)]
+Id=['Id',identity_matrix(2)]
 GateTypes=sorted([H,S])
 
 
@@ -75,10 +76,11 @@ def BuildG(n):
 	L=[]
 	L2=[]
 	L3=[['Id',Gate(0,n,Id)]]
-	##  Ensuring we consider the conjugate, transpose of each of our considered unitaries
+	##  Ensuring we consider the conjugate, transpose of each of our considered unitaries (except for self-adjoint gates)
 	for i in range(len(GateTypes)):
 		Conjugate=[GateTypes[i][0]+"*", conjugate(transpose(GateTypes[i][1]))]
-		GateTypes.append(Conjugate)
+		if (GateTypes[i][1] == Conjugate[1]) == False:
+			GateTypes.append(Conjugate)
 	##  Cartesian Product of the Gate Types
 	for i in range(n):
 		L.append([])
@@ -90,7 +92,7 @@ def BuildG(n):
 	##  Joining unique sets of cartesian products, separated by a space
 	for i in range(len(L2)):
 		NumOfGates=len(L2[i])
-		SQG=matrix.identity(2^n)
+		SQG=identity_matrix(2**n)
 		for ii in range(NumOfGates):
 			pos=ii
 			for iii in range(len(GateTypes)):
@@ -133,7 +135,7 @@ def StrToUnitary(str,G):
 
 
 ##  This function will take a list of circuit-strings and a given unitary, and return a True/False valuation
-##        as to whether or not the unitary is contained in the list
+##        as to whether or not the unitary corresponds to a circuit contained in the list
 def TestCircuitList(CircuitList,U,G):
 	##  Setting a boolean test
 	flag=False
@@ -148,17 +150,41 @@ def TestCircuitList(CircuitList,U,G):
 
 ##  This function will take a list of circuit-strings and a single quantum gate, and return a list of unique
 ##        circuit-strings which were not in the original list
-@parallel(16)
-def ExpandBySQG(CircuitList,SQG,G):
+@parallel(CORECOUNT)
+def ExpandBySQG(CircuitList,Gn,SQG,G):
 	##  Initialize output list
 	L=[]
 	##  Iterate through the circuit list and add new circuit strings to the final list
-	for i in CircuitList:
+	for i in Gn:
 		Prod=SQG[1]*StrToUnitary(i,G)
 		if TestCircuitList(CircuitList,Prod,G)==False:
 			L.append(i+','+SQG[0])
 	return(L)
 
+
+def SplitLists(lst,G):
+	out=[]
+	TupleList=[]
+	numoflists=max(ceil(len(lst)/CORECOUNT),2)
+	for i in range(0,len(lst),numoflists):
+		out.append(lst[i:i+numoflists])
+	for i in out:
+		Tuple=tuple([i,G])
+		TupleList.append(Tuple)
+	return TupleList
+
+
+##  This function takes a list of lists of circuit-strings and returns only a single list of unique circuit strings
+@parallel(CORECOUNT)
+def ReduceCircuitLists(lst,G):
+	##  Initialize final list
+	L=[]
+	##  Iterate adding only new items to the list
+	for i in lst:
+		for ii in i:
+			if TestCircuitList(L,StrToUnitary(ii,G),G)==False:
+				L.append(ii)
+	return(L)
 
 ##  This function takes a list of lists of circuit-strings and returns only a single list of unique circuit strings
 def EnsureUnique(lst,G):
@@ -180,7 +206,7 @@ def SWAP(i,j,n):
 
 ##  This function creates all permutation matrices for swaps on n wires
 def PermMatrices(n):
-	IdElem=matrix.identity(2^n)
+	IdElem=identity_matrix(2**n)
 	FinalList=[]
 	cycles=[]
 	swaps=[]
@@ -207,10 +233,10 @@ def PermMatrices(n):
 
 
 ##  This function creates a list of tuples for ExpandBySQG use within a parallel decorator
-def TupleG(CircuitList,G):
+def TupleG(CircuitList,Gn,G):
 	TupleList=[]
 	for i in G:
-		Tuple=tuple([CircuitList,i,G])
+		Tuple=tuple([CircuitList,Gn,i,G])
 		TupleList.append(Tuple)
 	return TupleList
 
@@ -234,31 +260,54 @@ def TME(U,l):
 		if abs(U[l[i][0]][l[i][1]])!=1:
 			test=false
 			break
-	if U==matrix.identity(len(list(U))):
+	if U==identity_matrix(len(list(U))):
 		test=false
 	return test
 
 
 ##  Finally, we have the meet in the middle protocol. Here we input a target unitary U and a depth d, and we
 ##        return the circuit-strings which match the unitary (up to phase)
-def MitM(U,d):
-	P=PermMatrices(log(len(U[0]),2))
-	G=BuildG(log(len(U[0]),2))
-	Circuits=[]
-	for i in G:
-		Circuits.append(i[0])
-	Circuits=sorted(EnsureUnique([Circuits],G))
+def MitM(U,d,StartingList=''):
+	placeholder=[]
+	totaltime_start=time.time()
+	n=int(log(len(U[0]),2))
+	P=PermMatrices(n)
+	print('Creating generating set for ' + str(n) + ' qubits.')
+	G0=BuildG(n)
+	if not StartingList==False:
+		Circuits=[]
+		for i in G0:
+			Circuits.append([i[0]])
+		Circuits=EnsureUnique(Circuits,G0)
+	else:
+		with open(StartingList, 'rb') as pickle_file:
+			Circuits=pickle.load(pickle_file)
+	Gn=deepcopy(Circuits)
 	l=FindOnes(U)
 	TargetCircuits=[]
 	length=0
+	print('Creating unique set of circuits up to depth ' + str(d) + ', and searching for collisions.')
 	while length<(d-1):
-		Tuples=TupleG(Circuits,G)
+		print(str(int(100*length/(d-1))) + '%')
+		Tuples=TupleG(Circuits,Gn,G0)
 		UpdaterList=[]
+		print('Expanding by gate set.')
 		for Input,Output in sorted(list(ExpandBySQG(Tuples))): UpdaterList.append(Output)
-		Circuits=sorted(Circuits+EnsureUnique(UpdaterList,G))
+		spl=SplitLists(UpdaterList,G0)
+		Gn=[]
+		t1=time.time()
+		print('Adding unique gates to full set.')
+		for Input2,Output2 in sorted(list(ReduceCircuitLists(spl))): Gn.append(Output2)
+		Gn=EnsureUnique(Gn,G0)
+		Circuits=Circuits+Gn
+		t2=time.time()
+		with open('/Users/Ross/Desktop/NewList.pkl', 'wb') as pickle_file:
+			pickle.dump(Circuits,pickle_file)
+		print(t2-t1)
+		print('Checking for collisions.')
 		for i in range(len(P)):
 			for ii in Circuits:
-				Pii=P[i]*StrToUnitary(ii,G)*P[i]
+				Pii=P[i]*StrToUnitary(ii,G0)*P[i]
 				Pii.set_immutable()
 				if TME(Pii,l)==true:
 					if ii not in TargetCircuits:
@@ -266,9 +315,5 @@ def MitM(U,d):
 				else:
 					continue
 		length += 1
+	print(time.time()-totaltime_start)
 	return(TargetCircuits)
-
-
-
-		
-		
